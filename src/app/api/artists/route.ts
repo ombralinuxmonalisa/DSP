@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { artistSchema, rateLimit, sanitizeString } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const prisma = await getPrisma()
     const artists = await prisma.artist.findMany({
       include: {
         albums: { select: { id: true, title: true, coverImage: true, releaseType: true } }
@@ -14,14 +13,21 @@ export async function GET() {
       orderBy: { name: 'asc' }
     })
     return NextResponse.json(artists)
-  } catch {
+  } catch (error) {
+    console.error('Artists GET error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const { getSession } = await import('@/lib/auth')
+    const { artistSchema, rateLimit, sanitizeString } = await import('@/lib/security')
+    
+    const prisma = await getPrisma()
     const session = await getSession()
+    
     if (!session?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -47,7 +53,8 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(artist, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('Artists POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

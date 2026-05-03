@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const prisma = await getPrisma()
     const { searchParams } = new URL(request.url)
     const artistId = searchParams.get('artistId')
     const releaseType = searchParams.get('releaseType')
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         artist: { select: { id: true, name: true } },
-        tracks: { select: { id: true, title: true, audioUrl: true, duration: true, position: true, artistId: true } }
+        tracks: { select: { id: true, title: true, audioUrl: true, duration: true, position: true } }
       },
       orderBy: { createdAt: 'desc' }
     })

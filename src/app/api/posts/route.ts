@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
-import { postSchema, rateLimit, sanitizeString } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const prisma = await getPrisma()
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
@@ -25,14 +24,21 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(posts)
-  } catch {
+  } catch (error) {
+    console.error('Posts GET error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const { getSession } = await import('@/lib/auth')
+    const { postSchema, rateLimit, sanitizeString } = await import('@/lib/security')
+    
+    const prisma = await getPrisma()
     const session = await getSession()
+    
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -61,7 +67,8 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(post, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('Posts POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

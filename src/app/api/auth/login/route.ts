@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { verifyPassword, createToken, setSessionCookie } from '@/lib/auth'
-import { loginSchema, rateLimit } from '@/lib/security'
 
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: NextRequest) {
   try {
+    const { getPrisma } = await import('@/lib/prisma')
+    const { loginSchema, rateLimit } = await import('@/lib/security')
+    const { verifyPassword, createToken, setSessionCookie } = await import('@/lib/auth')
+    
+    const prisma = await getPrisma()
+    
     const ip = request.headers.get('x-forwarded-for') || 'unknown'
     if (!rateLimit(`login:${ip}`, 10, 60000)) {
       return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
@@ -37,7 +40,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       user: { id: user.id, username: user.username, email: user.email, isAdmin: user.isAdmin }
     })
-  } catch {
+  } catch (error) {
+    console.error('Login error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
