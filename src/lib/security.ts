@@ -32,6 +32,10 @@ export function sanitizeUsername(input: string): string {
   return input.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 30)
 }
 
+export function sanitizeEmail(email: string): string {
+  return email.toLowerCase().trim()
+}
+
 export function isValidUrl(string: string): boolean {
   try {
     new URL(string)
