@@ -13,7 +13,15 @@ interface Album {
   releaseDate: string | null
   purchaseUrl: string | null
   artist: { id: string; name: string }
-  tracks: { id: string; title: string; audioUrl: string; duration: number | null; position: number }[]
+  tracks: {
+    id: string
+    title: string
+    audioUrl: string
+    duration: number | null
+    position: number
+    artist: { id: string; name: string }
+    album: { id: string; title: string; coverImage: string | null }
+  }[]
 }
 
 interface AlbumCardProps {
