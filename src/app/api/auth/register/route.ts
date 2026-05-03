@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { hashPassword, createToken, setSessionCookie } from '@/lib/auth'
 import { registerSchema, rateLimit, sanitizeEmail } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get('x-forwarded-for') || 'unknown'

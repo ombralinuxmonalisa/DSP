@@ -3,6 +3,8 @@ import { getSession } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { artistSchema, rateLimit, sanitizeString } from '@/lib/security'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const artists = await prisma.artist.findMany({
