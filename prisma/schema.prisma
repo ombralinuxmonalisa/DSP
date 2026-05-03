@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
+  comments  Comment[]
+
+  @@map("users")
+}
+
+model Artist {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  bio         String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  albums      Album[]
+  tracks      Track[]
+
+  @@map("artists")
+}
+
+model Album {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  coverImage  String?
+  releaseType ReleaseType
+  releaseDate DateTime?
+  purchaseUrl String?
+  artistId    String
+  artist      Artist      @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  tracks      Track[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("albums")
+}
+
+model Track {
+  id        String  @id @default(cuid())
+  title     String
+  audioUrl  String
+  duration  Int?
+  position  Int
+  albumId   String
+  album     Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  artistId  String
+  artist    Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@map("tracks")
+}
+
+model Post {
+  id        String    @id @default(cuid())
+  content   String
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@map("comments")
+}
+
+enum ReleaseType {
+  SINGLE
+  EP
+  ALBUM
+  DELUXE
+}
